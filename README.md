@@ -60,6 +60,9 @@ Figure 21 of the paper (Asymmetric appearance)
 https://user-images.githubusercontent.com/26176709/171328354-88abcaa5-d148-4bad-8f3b-099f5bd35972.mp4
 </details>
 
+## Quantitative results
+
+<img src=".env/fid.png" width="100%">
 
 
 ## Citation

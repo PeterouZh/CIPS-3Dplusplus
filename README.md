@@ -8,6 +8,14 @@ This repository will contain the code of the paper, </br >
 
 <details open>
 <summary>
+  Projecting real images
+</summary>
+  
+https://user-images.githubusercontent.com/26176709/171443469-12676d42-c278-49dd-969d-e9fb9e79b453.mp4
+</details>
+
+<details open>
+<summary>
 Training from scratch (256x256 resolution)
 </summary>
   

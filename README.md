@@ -42,3 +42,32 @@ https://user-images.githubusercontent.com/26176709/171323755-5d2361d5-f964-4c4c-
 </details>
 
 
+<details open>
+<summary>
+Figure 10 of the paper (FlipInversion vs inversion)
+</summary>
+  
+
+https://user-images.githubusercontent.com/26176709/171328184-62b0150f-dd25-482c-8ab2-7a1e027d0542.mp4
+</details>
+
+
+<details open>
+<summary>
+Figure 21 of the paper (Asymmetric appearance)
+</summary>
+  
+https://user-images.githubusercontent.com/26176709/171328354-88abcaa5-d148-4bad-8f3b-099f5bd35972.mp4
+</details>
+
+
+
+## Citation
+
+
+## Acknowledgments
+
+
+
+
+

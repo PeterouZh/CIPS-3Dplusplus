@@ -16,6 +16,14 @@ https://user-images.githubusercontent.com/26176709/171443469-12676d42-c278-49dd-
 
 <details open>
 <summary>
+  Stylization for real images
+</summary>
+  
+https://user-images.githubusercontent.com/26176709/173470643-de591dad-c599-4233-b8ac-48dc6d3eed7f.mp4
+</details>
+
+<details open>
+<summary>
 Training from scratch (256x256 resolution)
 </summary>
   

@@ -1,5 +1,13 @@
 # CIPS3Dpp_release
 
+<details open>
+<summary>
+  3D-aware GAN inversion
+</summary>
+  
+https://user-images.githubusercontent.com/26176709/171443469-12676d42-c278-49dd-969d-e9fb9e79b453.mp4
+</details>
+
 ## Preparing envs
 
 ```bash

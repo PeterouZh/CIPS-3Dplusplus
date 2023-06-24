@@ -1,4 +1,4 @@
-# CIPS3Dpp_release
+# CIPS-3D++
 
 <details open>
 <summary>

@@ -1,5 +1,7 @@
 # CIPS-3D++
 
+[Paper](https://ieeexplore.ieee.org/document/10149489)
+
 <details open>
 <summary>
   3D-aware GAN inversion

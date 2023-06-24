@@ -1,0 +1,678 @@
+root_obs: &root_obs s3://bucket-3690/ZhouPeng
+
+network_pkl: &network_pkl
+  CombCars_r512_inversion: "pretrained/compcars_r512_inversion"
+
+
+obs_inception_v3: &obs_inception_v3
+  datapath_obs: 'keras/cache/torch/hub/checkpoints/weights-inception-2015-12-05-6726825d.pth'
+  datapath: "~/.cache/torch/hub/checkpoints/weights-inception-2015-12-05-6726825d.pth"
+  disable: false
+  overwrite: false
+  unzip: false
+
+obs_compcars_r256: &obs_compcars_r256
+  datapath_obs: 'keras/CompCars/image_lmdb_256/'
+  datapath: "datasets/CompCars/image_lmdb_256/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+obs_compcars_r512: &obs_compcars_r512
+  datapath_obs: 'keras/CompCars/CombCars_center_crop_lmdb_512/'
+  datapath: "datasets/CompCars/CombCars_center_crop_lmdb_512/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+obs_giraffe_gen_r256_lmdb: &obs_giraffe_gen_r256_lmdb
+  datapath_obs: 'cache_pretrained/giraffe-exp/gen_images_cars_r256_lmdb_256/'
+  datapath: "cache_pretrained/gen_images_cars_r256_lmdb_256/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+obs_giraffe_training_r256: &obs_giraffe_training_r256
+  datapath_obs: 'cache_pretrained/giraffe-exp/giraffe_training_cars_r256_lmdb_256/'
+  datapath: "cache_pretrained/datasets/giraffe_training_cars_r256_lmdb_256/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+obs_compcars_pad_r256: &obs_compcars_pad_r256
+  datapath_obs: 'keras/CompCars/image_pad_lmdb_256/'
+  datapath: "datasets/CompCars/image_pad_lmdb_256/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+obs_compcars_pad_r512: &obs_compcars_pad_r512
+  datapath_obs: 'keras/CompCars/image_pad_lmdb_512/'
+  datapath: "datasets/CompCars/image_pad_lmdb_512/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+
+G_cfg: &G_cfg
+  register_modules:
+    - "exp.cips3d.models.model_v3"
+  name: "exp.cips3d.models.model_v3.Generator"
+  enable_decoder: true
+  freeze_renderer: false
+  renderer_detach: true
+  predict_rgb_residual: false
+  scale_factor: 1
+  renderer_cfg:
+#    N_layers_renderer: 8
+    N_layers_renderer: 2
+    input_dim: 3
+    hidden_dim: 256
+#    style_dim: 256
+    view_dim: 3
+    with_sdf: true
+    output_features : true
+  mapping_renderer_cfg:
+    z_dim: 256
+    style_dim: 256
+    N_layers: 3
+  decoder_cfg:
+    size_start: 4
+    size_end: 1024
+#    'style_dim': 512
+#    'in_channel': 256
+    'channel_multiplier': 2
+    'project_noise': False
+    'upsample_list': [128, 256, 512, 1024]
+#    'upsample_list': []
+    'kernel_size': 1
+  mapping_decoder_cfg:
+#    z_dim: 256
+    style_dim: 512
+    lr_mul_mapping: 0.01
+    N_layers: 5
+
+
+G_kwargs: &G_kwargs
+  cam_cfg:
+    'img_size': 64
+#    'uniform': False
+#    'azim_range': 0.3
+#    'elev_range': 0.15
+    'uniform': True
+    'azim_range': [-3.14, 3.14]
+#    'elev_range': [0., 0.3]
+    'elev_range': [0., 0.1674]
+    'fov_ang': 15
+    'dist_radius': 0.3
+  nerf_cfg:
+    N_samples: 24
+#    N_samples: 48
+    perturb: true
+    static_viewdirs: false
+
+_build_generator:
+  G_cfg: *G_cfg
+  G_kwargs: *G_kwargs
+
+D_cfg: &D_cfg
+  register_modules:
+    - "exp.cips3d.models.discriminator"
+  name: "exp.cips3d.models.discriminator.D_StyleGAN_Progressive"
+  input_size: 1024
+  channel_multiplier: 2
+  pretrained_size: null
+
+D_renderer_cfg: &D_renderer_cfg
+  register_modules:
+    - "exp.cips3d.models.discriminator_pose"
+  name: "exp.cips3d.models.discriminator_pose.D_VolumeRender_Progressive"
+  input_size: 1024
+  viewpoint_loss: true
+  pretrained_size: null
+
+obs_giraffe_gen_r256: &obs_giraffe_gen_r256
+    datapath_obs: 'cache_pretrained/giraffe-exp/gen_images_cars_r256'
+    datapath: "../giraffe-exp/cache_pretrained/gen_images_cars_r256/0"
+    disable: false
+    overwrite: false
+    unzip: false
+
+prepare_data_giraffe_gen_cars_r256:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_giraffe_gen_r256
+  in_path: "../giraffe-exp/cache_pretrained/gen_images_cars_r256"
+  obs_out_path: "cache_pretrained/giraffe-exp/"
+  out_path: "cache_pretrained/"
+  saved_name: "gen_images_cars_r256"
+  n_worker: 32
+  size: [256, ]
+
+obs_giraffe_training_dataset: &obs_giraffe_training_dataset
+  datapath_obs: 'cache_pretrained/giraffe-exp/comprehensive_cars.zip'
+  datapath: "cache_pretrained/datasets/comprehensive_cars.zip"
+  disable: false
+  overwrite: false
+  unzip: true
+
+prepare_data_giraffe_training_r256:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_giraffe_training_dataset
+  in_path: "cache_pretrained/datasets/comprehensive_cars"
+  obs_out_path: "cache_pretrained/giraffe-exp/"
+  out_path: "cache_pretrained/datasets/"
+  saved_name: "giraffe_training_cars_r256"
+  n_worker: 32
+  size: [256, ]
+
+prepare_data_giraffe_training_r512:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_giraffe_training_dataset
+  in_path: "cache_pretrained/datasets/comprehensive_cars"
+  obs_out_path: "cache_pretrained/giraffe-exp/"
+  out_path: "cache_pretrained/datasets/"
+  saved_name: "giraffe_training_cars_r512"
+  n_worker: 32
+  size: [512, ]
+
+obs_CombCars_dataset: &obs_CombCars_dataset
+  datapath_obs: 'keras/CompCars/CombCars/image/'
+  datapath: "datasets/CompCars/CombCars/image/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+prepare_data_compcars_r512:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_CombCars_dataset
+  in_path: "datasets/CompCars/CombCars/image/"
+  obs_out_path: "keras/CompCars/"
+  out_path: "datasets/"
+  saved_name: "CombCars_center_crop"
+  n_worker: 32
+  size: [512, ]
+
+
+train_base:
+  root_obs: *root_obs
+  obs_training_dataset: *obs_compcars_r256
+#  obs_training_dataset: *obs_ffhq_r64
+  obs_inception_v3: *obs_inception_v3
+  G_cfg: *G_cfg
+  G_kwargs: *G_kwargs
+  D_cfg: *D_cfg
+  D_renderer_cfg: *D_renderer_cfg
+  # optims
+  G_lr_render: 2.e-5
+  G_lr_decoder: 0.002
+  D_lr_render: 2.e-4
+  D_lr_decoder: 0.002
+  # args
+  total_iters: 200000
+  ema_start: 1000
+  batch: 4
+  chunk: 4
+  expname: ffhq1024x1024
+  size: 1024
+  tl_finetune: false
+  finetune_dir: "results/StyleSDF-exp/train_volume_render_ffhq/train_volume_render-20220325_102346_871/ckptdir/01"
+  # train
+  d_reg_every: 15
+  g_reg_every: 5
+#  d_reg_every: 16
+#  g_reg_every: 4
+  path_regularize: 2
+  N_rays_forward: null
+  N_rays_grad: null
+  N_samples_forward: null
+  fade_D: true
+  fade_steps: 10000
+  init_renderer: true
+  init_renderer_ckpt: null
+#  init_renderer_ckpt: "results/StyleSDF-exp/train_cips3d_ffhq/train_r64-20220331_224622_038/ckptdir/G_sdf_init.pth"
+  grad_clip: 20.
+  warmup_iters: -1
+  num_workers: 0
+  # loss
+  lambda_gp: 10.
+  lambda_pose: 15.
+  lambda_eikonal: 0.1
+  lambda_min_surf: 0.05
+  min_surf_beta: 100.
+  # log
+  log_txt_every: 10
+  log_ckpt_every: 500
+  log_N_row: 8
+  log_N_col: 8
+  # eval
+  batch_gpu: 4
+  N_gen_images_eval: 2048
+  N_real_images_eval: 2048
+  del_fid_real_images: true
+  kid: false
+
+train_r256_r32_ks1:
+  base: train_base
+  obs_training_dataset: *obs_compcars_r256
+  G_cfg:
+    enable_decoder: true
+#    freeze_renderer: true
+#    renderer_detach: true
+    freeze_renderer: false
+    renderer_detach: false
+    predict_rgb_residual: false
+    renderer_cfg:
+      N_layers_renderer: 2
+      hidden_dim: 256
+    decoder_cfg:
+      upsample_list: [128, 256, 512]
+      kernel_size: 1
+  G_kwargs:
+    cam_cfg:
+      img_size: 32
+    nerf_cfg:
+      static_viewdirs: false
+  D_cfg:
+    pretrained_size: null
+  D_renderer_cfg:
+    pretrained_size: null
+  init_renderer: true
+  init_iters: 20000
+  tl_finetune: false
+#  finetune_dir: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v3/train_r64-20220411_105857_803/ckptdir/resume"
+  total_iters: 800000
+  ema_start: 1000
+  N_rays_forward: null
+  N_rays_grad: null
+  N_samples_forward: null
+  eikonal_reg: true
+  sdf_reg: true
+#  eikonal_reg: false
+#  sdf_reg: false
+  g_reg_every: 5
+#  g_reg_every: -1 # path_reg false
+  batch_gpu: 4
+  warmup_iters: 20000
+  cam_img_size: 32
+  gen_img_size: 256 # train patch size
+  data_img_size: 256
+#  sample_mode: 'patch'
+  lambda_pose: 0.
+  fade_steps: 20000
+
+train_r256_r64_ks1:
+  base: train_base
+  obs_training_dataset: *obs_compcars_r256
+  G_cfg:
+    enable_decoder: true
+#    freeze_renderer: true
+#    renderer_detach: true
+    freeze_renderer: false
+    renderer_detach: false
+    predict_rgb_residual: false
+    renderer_cfg:
+#      N_layers_renderer: 2
+      N_layers_renderer: 6
+      hidden_dim: 256
+    decoder_cfg:
+      upsample_list: [128, 256]
+      kernel_size: 1
+  G_kwargs:
+    cam_cfg:
+      img_size: 64
+  D_cfg:
+    pretrained_size: null
+  D_renderer_cfg:
+    pretrained_size: null
+  init_renderer: true
+  init_iters: 20000
+  tl_finetune: false
+#  finetune_dir: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v3/train_r64-20220411_105857_803/ckptdir/resume"
+  total_iters: 800000
+  ema_start: 1000
+  N_rays_forward: null
+  N_rays_grad: null
+  N_samples_forward: null
+  eikonal_reg: true
+  sdf_reg: true
+#  eikonal_reg: false
+#  sdf_reg: false
+  g_reg_every: 5
+#  g_reg_every: -1 # path_reg false
+  batch_gpu: 4
+  warmup_iters: 10000
+  cam_img_size: 64
+  gen_img_size: 256 # train patch size
+  data_img_size: 256
+#  sample_mode: 'patch'
+
+train_r512_r64_ks1:
+  base: train_base
+  obs_training_dataset: *obs_compcars_r512
+  G_cfg:
+    enable_decoder: true
+#    freeze_renderer: true
+#    renderer_detach: true
+    freeze_renderer: false
+    renderer_detach: false
+    predict_rgb_residual: false
+    renderer_cfg:
+#      N_layers_renderer: 2
+      N_layers_renderer: 6
+      hidden_dim: 256
+    decoder_cfg:
+      upsample_list: [128, 256, 512]
+      kernel_size: 1
+  G_kwargs:
+    cam_cfg:
+      img_size: 64
+  D_cfg:
+    pretrained_size: 256
+  D_renderer_cfg:
+    pretrained_size: -1
+  init_renderer: true
+  init_iters: 20000
+  tl_finetune: false
+#  finetune_dir: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v3/train_r64-20220411_105857_803/ckptdir/resume"
+  total_iters: 800000
+  ema_start: 1000
+  N_rays_forward: null
+  N_rays_grad: null
+  N_samples_forward: null
+  eikonal_reg: true
+  sdf_reg: true
+#  eikonal_reg: false
+#  sdf_reg: false
+  g_reg_every: 5
+#  g_reg_every: -1 # path_reg false
+  batch_gpu: 4
+  warmup_iters: 10000
+  cam_img_size: 64
+  gen_img_size: 512 # train patch size
+  data_img_size: 512
+#  sample_mode: 'patch'
+
+
+train_r256_r64_ks1_giraffe_gen:
+  base: train_r256_r64_ks1
+  obs_training_dataset: *obs_giraffe_gen_r256_lmdb
+
+train_r256_r64_ks1_giraffe_training:
+  base: train_r256_r64_ks1
+  obs_training_dataset: *obs_giraffe_training_r256
+
+_gen_images:
+  base: train_base
+  network_pkl: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq/train_r64-20220402_160907_188/ckptdir/resume/G_ema.pth"
+  N_gen_images_eval: 2048
+  batch_gpu: 4
+
+_setup_evaluation:
+  base: train_base
+  N_real_images_eval: 2048
+  del_fid_real_images: true
+
+eval_fid_r256:
+  base: train_r256_r32_ks1
+#  network_pkl: "results/StyleSDF-exp/train_cips3d_compcars_v3/train_r256_r32_ks1-20220419_192219_135/ckptdir/resume/G_ema.pth"
+  network_pkl: "results/StyleSDF-exp/train_cips3d_compcars_v3/train_r256_r32_ks1-20220419_192219_135/ckptdir/best_fid/G_ema.pth"
+#  network_pkl: "results/StyleSDF-exp/train_cips3d_compcars_v3/train_r256_r32_ks1-20220419_192340_168/ckptdir/resume/G_ema.pth"
+#  network_pkl: "results/StyleSDF-exp/train_cips3d_compcars_v3/train_r256_r32_ks1-20220419_192340_168/ckptdir/best_fid/G_ema.pth"
+  batch_gpu: 4
+  N_gen_images_eval: 2048
+  N_real_images_eval: 2048
+  del_fid_real_images: true
+  kid: false
+  real_dir: "cache_pretrained/compcars_r256_5w/"
+#  real_dir: null
+  fake_dir: null
+  overwrite: false
+  data_img_size: 256
+
+_gen_images_compcars:
+  base: train_r256_r32_ks1
+#  G_kwargs:
+#    nerf_cfg:
+#      'static_viewdirs': true
+#    cam_cfg:
+#      azim_range: 0
+#      elev_range: 0
+  network_pkl: *network_pkl
+  default_network_pkl: "r256_r32_ks1"
+  N_gen_images_eval: 1000
+  batch_gpu: 4
+  truncation: 0.7
+
+
+_render_video_web:
+  root_obs: *root_obs
+  port: 8501
+  sidebar:
+    sidebar_name: "show_video"
+  model_cfg:
+    register_modules:
+      - exp.cips3d.models.render_video_web_v3
+    name: exp.cips3d.models.render_video_web_v3.STModel
+  mode:
+    - _render_video_web
+  _render_video_web:
+    G_kwargs: *G_kwargs
+    network_pkl: *network_pkl
+    default_network_pkl: CompCars_r256_r32_ks3_view_F
+    N_frames: 40
+    fps: 20
+    hd_video: true
+    view_mode:
+      - circle
+      - yaw
+    default_view_mode: yaw
+    seeds:
+      - 123
+    truncation_ratio: 0.5
+    img_size: 64
+    upsample_list: [128, 256, 512]
+    N_samples: 128
+    zero_noise_bufs: false
+  expname: ffhq1024x1024
+  size: 1024
+  identities: 4
+
+_sample_multi_view_web:
+  root_obs: *root_obs
+  port: 8501
+  sidebar:
+    sidebar_name: "show_video"
+  model_cfg:
+    register_modules:
+      - exp.cips3d.models.render_video_web_v10
+    name: exp.cips3d.models.render_video_web_v10.STModelCars
+  mode:
+    - _sample_multi_view_web
+  _sample_multi_view_web:
+    N_frames: 111
+    fps: 20
+    hd_video: true
+
+    truncation_ratio: 0.7
+    N_samples: 128
+    zero_noise_bufs: false
+    light_location: [ 0, 0, 5 ]
+    show_trajectory: true
+
+    seeds:
+      - 8268971
+
+      - 6806448
+      - 8936799
+      - 1422866
+      - 1010682
+      - 4921831
+#      - 8666477
+#      - 5949945
+#      - 5623520
+#      - 2397456
+#      - 2910468
+#      - 1317869
+    view_mode:
+      - yaw
+      - translate_rotate
+      - circle
+    default_view_mode: yaw
+#    azim_range: [-1.57, 1.57]
+#    azim_range: [-1., 1.]
+    azim_range: [-3.14, 3.14]
+    elev: 0.
+    trans_max: 0.06
+    circle:
+      azim_range: 0.5
+      elev_range: 0.
+      fov_range: [6, 8]
+
+    network_pkl: *network_pkl
+    default_network_pkl: CombCars_r512_inversion
+
+_flip_inversion_web:
+  base: _sample_multi_view_web
+  root_obs: *root_obs
+  port: 8501
+  sidebar:
+    sidebar_name: "show_video"
+  model_cfg:
+    register_modules:
+      - exp.cips3d.models.render_video_web_v10
+    name: exp.cips3d.models.render_video_web_v10.STModelCars
+  mode:
+    - _flip_inversion_web
+    - _sample_multi_view_web
+  _flip_inversion_web:
+    perceptual_cfg:
+      register_modules:
+      - exp.cips3d.models.vgg_per_loss
+      name: exp.cips3d.models.vgg_per_loss.VGG16ConvLoss
+      model_name: vgg16_conv
+      downsample_size: -1
+      use_stat_loss: false
+      layers:
+      - features_2
+      - features_7
+      - features_14
+      - features_21
+      - features_28
+      loss_w_dict:
+        features_2: 0.0002
+        features_7: 0.0001
+        features_14: 0.0001
+        features_21: 0.0002
+        features_28: 0.0005
+    image_list_files:
+      cars:
+        image_list_file: "datasets/cars"
+    st_log_every: 10
+
+    lr_cam: 0.02
+    lr_render_w: 0.001
+    lr_decoder_w: 0.01
+    lr_decoder_params: 0.005
+    lr_noise: 0.001
+
+    rgb_weight: 1.
+    thumb_weight: 50.
+    mse_weight: 0.
+    regularize_noise_weight: 100000
+
+    optim_cam: true
+    optim_render_w: true
+    optim_render_params: false
+    optim_decoder_w: true
+    optim_decoder_params: true
+    optim_noise_bufs: false
+    zero_noise_bufs: true
+
+    bs_cam: 2
+    bs_render: 1
+    bs_decoder: 2
+
+    N_steps_pose: 200
+    N_steps_app: 1000
+    N_steps_multiview: 0
+    truncation_psi: 1.
+    mask_background: false
+    flip_w_decoder_every: 10
+
+    network_pkl: *network_pkl
+    default_network_pkl: CombCars_r512_inversion
+
+    seeds:
+      - 123
+#    azim_init: [0, 0]
+    azim_init: [-1, 3]
+
+    N_samples: 5
+    N_step: 20
+    z_mode:
+      - shape
+      - app
+      - style
+    default_z_mode: shape
+    interp_mode:
+      - lerp
+      - slerp
+    azim: 0.
+    elev: 0.
+    fov: 6.
+    truncation_ratio: 0.5
+    fps: 10
+    hd_video: true
+    grad_clip_cam: 10.
+    grad_clip_render: 10.
+    grad_clip_decoder: 10.
+
+
+_render_multi_view_web:
+  base: _flip_inversion_web
+  root_obs: *root_obs
+  port: 8501
+  sidebar:
+    sidebar_name: "show_video"
+  model_cfg:
+    register_modules:
+      - exp.cips3d.models.render_video_web_v10
+    name: exp.cips3d.models.render_video_web_v10.STModelCars
+  mode:
+    - _render_multi_view_web
+    - _sample_multi_view_web
+    - _flip_inversion_web
+  _render_multi_view_web:
+    N_frames: 40
+    fps: 20
+    hd_video: true
+
+    view_mode:
+      - yaw
+      - circle
+    default_view_mode: yaw
+#    azim_range: [-1.57, 1.57]
+    azim_range: [-3.14, 3.14]
+    elev_range: [0.2, 1.57]
+    fix_elev: true
+    circle:
+      azim: 0.25
+      elev: 0.25
+
+    seeds:
+      - 4892508
+    target_truncation: 0.8
+    zero_noise_bufs: true
+
+    network_pkl: *network_pkl
+    default_network_pkl: CombCars_r512_inversion
+    N_samples: 128
+
+    saved_w_file: ""
+    w_gallery:
+      car_proj: "results/train_cips3d_compcars_v10/_flip_inversion_web/exp"
+#      cars_proj: "../bucket_3690/cache_pretrained/cars/proj/"
+    default_w_gallery: 'car_proj'
+    use_w_gallery: true
+
+

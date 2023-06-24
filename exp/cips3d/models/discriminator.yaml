@@ -1,0 +1,15 @@
+
+_build_D_StyleGAN:
+  register_modules:
+    - "exp.cips3d.models.discriminator"
+  name: "exp.cips3d.models.discriminator.D_StyleGAN"
+  input_size: 1024
+  channel_multiplier: 2
+
+
+_build_D_StyleGAN_Progressive:
+  register_modules:
+    - "exp.cips3d.models.discriminator"
+  name: "exp.cips3d.models.discriminator.D_StyleGAN_Progressive"
+  input_size: 1024
+  channel_multiplier: 2

@@ -1,0 +1,23 @@
+root_obs: &root_obs s3://bucket-3690/ZhouPeng
+
+obs_ffhq1024x1024: &obs_ffhq1024x1024
+    datapath_obs: 'keras/StyleSDF-exp/cache_pretrained/pretrained/full_models/ffhq1024x1024.pt'
+    datapath: "cache_pretrained/pretrained/full_models/ffhq1024x1024.pt"
+    disable: false
+    overwrite: false
+    unzip: false
+
+obs_sphere_init: &obs_sphere_init
+    datapath_obs: 'keras/StyleSDF-exp/cache_pretrained/pretrained/pretrained_renderer/sphere_init.pt'
+    datapath: "cache_pretrained/pretrained/pretrained_renderer/sphere_init.pt"
+    disable: false
+    overwrite: false
+    unzip: false
+
+generate_shapes_and_images_ffhq_r1024:
+  root_obs: *root_obs
+  obs_checkpoint_path: *obs_ffhq1024x1024
+#  obs_checkpoint_path: *obs_sphere_init
+  expname: ffhq1024x1024
+  size: 1024
+  identities: 4

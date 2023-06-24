@@ -1,0 +1,87 @@
+root_obs: &root_obs s3://bucket-3690/ZhouPeng
+
+obs_ffhq_r1024: &obs_ffhq_r1024
+  datapath_obs: 'keras/ffhq/images1024x1024_lmdb_1024/'
+  datapath: "datasets/ffhq/images1024x1024_lmdb_1024/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+obs_ffhq_r64: &obs_ffhq_r64
+  datapath_obs: 'keras/ffhq/images1024x1024_lmdb_64/'
+  datapath: "datasets/ffhq/images1024x1024_lmdb_64/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+G_cfg: &G_cfg
+  register_modules:
+    - "exp.stylesdf.models.model"
+  name: "exp.stylesdf.models.model.Generator"
+  ema: false
+  full_pipeline: false
+  model_opt:
+    'size': 256
+    'style_dim': 256
+    'channel_multiplier': 2
+    'n_mlp': 8
+    'lr_mapping': 0.01
+    'renderer_spatial_output_dim': 64
+    'project_noise': False
+    'freeze_renderer': False
+    'no_viewpoint_loss': False
+  renderer_opt:
+    'depth': 8
+    'width': 256
+    'no_sdf': False
+    'no_z_normalize': False
+    'static_viewdirs': False
+    'N_samples': 24
+    'no_offset_sampling': False
+    'perturb': 1.0
+    'raw_noise_std': 0.0
+    'force_background': False
+    'return_xyz': False
+    'return_sdf': True
+    'no_features_output': True
+
+G_kwargs: &G_kwargs
+  cam_cfg:
+    'resolution': 64
+    'uniform': False
+    'azim_range': 0.3
+    'elev_range': 0.15
+    'fov_ang': 6
+    'dist_radius': 0.12
+
+_build_generator:
+  G_cfg: *G_cfg
+  G_kwargs: *G_kwargs
+
+train_volume_render:
+  root_obs: *root_obs
+  obs_training_dataset: *obs_ffhq_r64
+  obs_sphere_init_path: "keras/StyleSDF-exp/cache_pretrained/pretrained/pretrained_renderer/sphere_init.pt"
+  sphere_init_path: "cache_pretrained/pretrained/pretrained_renderer/sphere_init.pt"
+  G_cfg: *G_cfg
+  # args
+  total_iters: 200000
+  ema_start: 1000
+  batch: 4
+  chunk: 4
+  expname: ffhq_sdf_vol_renderer
+  # dataset
+  resolution: 64
+  nerf_resolution: 64
+  # loss
+  lambda_gp: 10.
+  lambda_pose: 15.
+  lambda_eikonal: 0.1
+  lambda_min_surf: 0.05
+  min_surf_beta: 100.
+  # log
+  log_txt_every: 10
+  log_ckpt_every: 1000
+  log_img_size: 64
+  log_N_row: 8
+  log_N_col: 8

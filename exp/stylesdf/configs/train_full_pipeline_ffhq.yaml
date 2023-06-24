@@ -1,0 +1,91 @@
+root_obs: &root_obs s3://bucket-3690/ZhouPeng
+
+obs_ffhq_r1024: &obs_ffhq_r1024
+  datapath_obs: 'keras/ffhq/images1024x1024_lmdb_1024/'
+  datapath: "datasets/ffhq/images1024x1024_lmdb_1024/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+obs_ffhq_r64: &obs_ffhq_r64
+  datapath_obs: 'keras/ffhq/images1024x1024_lmdb_64/'
+  datapath: "datasets/ffhq/images1024x1024_lmdb_64/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+G_cfg: &G_cfg
+  register_modules:
+    - "exp.stylesdf.models.model"
+  name: "exp.stylesdf.models.model.Generator"
+  ema: false
+  full_pipeline: true
+  model_opt:
+    'size': 1024
+    'style_dim': 256
+    'channel_multiplier': 2
+    'n_mlp': 8
+    'lr_mapping': 0.01
+    'renderer_spatial_output_dim': 64
+    'project_noise': False
+    'freeze_renderer': True
+  renderer_opt:
+    'depth': 8
+    'width': 256
+    'no_sdf': False
+    'no_z_normalize': False
+    'static_viewdirs': False
+    'N_samples': 24
+    'no_offset_sampling': False
+    'perturb': 1.0
+    'raw_noise_std': 0.0
+    'force_background': False
+    'return_xyz': False
+    'return_sdf': False
+
+G_kwargs: &G_kwargs
+  cam_cfg:
+    'resolution': 64
+    'uniform': False
+    'azim_range': 0.3
+    'elev_range': 0.15
+    'fov_ang': 6
+    'dist_radius': 0.12
+
+_build_generator:
+  G_cfg: *G_cfg
+  G_kwargs: *G_kwargs
+
+
+train_full_pipeline:
+  root_obs: *root_obs
+  obs_training_dataset: *obs_ffhq_r1024
+#  obs_training_dataset: *obs_ffhq_r64
+  G_cfg: *G_cfg
+  # args
+  total_iters: 300000
+  ema_start: 1000
+  batch: 4
+  chunk: 4
+  expname: ffhq1024x1024
+  size: 1024
+  tl_finetune: true
+  finetune_dir: "results/StyleSDF-exp/train_volume_render_ffhq/train_volume_render-20220325_102346_871/ckptdir/01"
+  # dataset
+  resolution: 1024
+  nerf_resolution: 1024
+  # train
+  d_reg_every: 15
+  g_reg_every: 5
+#  d_reg_every: 16
+#  g_reg_every: 4
+  path_regularize: 2
+  renderer_output_size: &renderer_output_size 64
+  gen_output_size: 1024
+  # loss
+  lambda_gp: 10.
+  # log
+  log_txt_every: 10
+  log_ckpt_every: 1000
+  log_N_row: 8
+  log_N_col: 8

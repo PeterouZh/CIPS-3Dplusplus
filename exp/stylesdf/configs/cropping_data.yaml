@@ -1,0 +1,21 @@
+root_obs: &root_obs s3://bucket-3690/ZhouPeng
+
+obs_ffhq_dataset: &obs_ffhq_dataset
+    datapath_obs: 'keras/chairs/rendered_chairs'
+    datapath: "datasets/chairs/rendered_chairs"
+    disable: false
+    overwrite: false
+    unzip: false
+
+
+crop_chair_c300_r256:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_ffhq_dataset
+  resample: lanczos
+  crop_size: 300
+  resize_size: 256
+  in_path: "datasets/chairs/rendered_chairs"
+  out_path: "datasets/chairs/"
+  obs_out_path: "keras/chairs/"
+  n_worker: 32
+

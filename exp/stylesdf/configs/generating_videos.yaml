@@ -1,0 +1,71 @@
+root_obs: &root_obs s3://bucket-3690/ZhouPeng
+
+obs_ffhq1024x1024: &obs_ffhq1024x1024
+    datapath_obs: 'keras/StyleSDF-exp/cache_pretrained/pretrained/full_models/ffhq1024x1024.pt'
+    datapath: "cache_pretrained/pretrained/full_models/ffhq1024x1024.pt"
+    disable: false
+    overwrite: false
+    unzip: false
+
+obs_sphere_init: &obs_sphere_init
+    datapath_obs: 'keras/StyleSDF-exp/cache_pretrained/pretrained/pretrained_renderer/sphere_init.pt'
+    datapath: "cache_pretrained/pretrained/pretrained_renderer/sphere_init.pt"
+    disable: false
+    overwrite: false
+    unzip: false
+
+render_video_ffhq_r1024:
+  root_obs: *root_obs
+  obs_checkpoint_path: *obs_ffhq1024x1024
+#  obs_checkpoint_path: *obs_sphere_init
+  expname: ffhq1024x1024
+  size: 1024
+  identities: 4
+  num_frames: 250
+
+render_video_ffhq_r1024_web:
+  root_obs: *root_obs
+  obs_checkpoint_path: *obs_ffhq1024x1024
+  port: 8501
+  sidebar:
+    sidebar_name: "show_video"
+  model_cfg:
+    register_modules:
+      - exp.stylesdf.scripts.render_video_web
+    name: exp.stylesdf.scripts.render_video_web.STModel
+  mode:
+    - render_video_ffhq_r1024_web
+  render_video_ffhq_r1024_web:
+    N_frames: 111
+    fps: 20
+    hd_video: true
+    truncation_ratio: 0.5
+    view_mode:
+      - yaw
+      - circle
+      - translate_rotate
+
+    default_view_mode: translate_rotate
+    only_rotate: true
+    azim_mean: 0.
+    elev_mean: 0.
+    azim_std: 0.3
+    elev_std: 0.25
+    fov: 6.
+    fov_std: 0.
+    trans_max: 0.06
+    show_trajectory: true
+
+    seeds:
+      - 9420741
+      - 1520911
+  cam_cfg:
+    'img_size': 64
+    'uniform': False
+    'azim_range': 0.3
+    'elev_range': 0.15
+    'fov_ang': 6
+    'dist_radius': 0.12
+  expname: ffhq1024x1024
+  size: 1024
+  identities: 4

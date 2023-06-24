@@ -1,0 +1,85 @@
+root_obs: &root_obs s3://bucket-3690/ZhouPeng
+
+obs_inception_v3: &obs_inception_v3
+  datapath_obs: 'keras/cache/torch/hub/checkpoints/weights-inception-2015-12-05-6726825d.pth'
+  datapath: "~/.cache/torch/hub/checkpoints/weights-inception-2015-12-05-6726825d.pth"
+  disable: false
+  overwrite: false
+  unzip: false
+
+
+obs_ffhq_r1024: &obs_ffhq_r1024
+  datapath_obs: 'keras/ffhq/images1024x1024_lmdb_1024/'
+  datapath: "datasets/ffhq/images1024x1024_lmdb_1024/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+
+
+
+G_cfg: &G_cfg
+  register_modules:
+    - "exp.stylesdf.models.model"
+  name: "exp.stylesdf.models.model.Generator"
+  ema: false
+  full_pipeline: true
+  model_opt:
+    'size': 1024
+    'style_dim': 256
+    'channel_multiplier': 2
+    'n_mlp': 8
+    'lr_mapping': 0.01
+    'renderer_spatial_output_dim': 64
+    'project_noise': False
+    'freeze_renderer': True
+  renderer_opt:
+    'depth': 8
+    'width': 256
+    'no_sdf': False
+    'no_z_normalize': False
+    'static_viewdirs': False
+    'N_samples': 24
+    'no_offset_sampling': False
+    'perturb': 1.0
+    'raw_noise_std': 0.0
+    'force_background': False
+    'return_xyz': False
+    'return_sdf': False
+
+G_kwargs: &G_kwargs
+  cam_cfg:
+    'resolution': 64
+    'uniform': False
+    'azim_range': 0.3
+    'elev_range': 0.15
+    'fov_ang': 6
+    'dist_radius': 0.12
+    img_size: 1024
+
+
+eval_fid_r1024:
+  root_obs: *root_obs
+  obs_inception_v3: *obs_inception_v3
+  obs_training_dataset: *obs_ffhq_r1024
+  G_cfg: *G_cfg
+  G_kwargs: *G_kwargs
+  network_pkl: "keras/StyleSDF-exp/cache_pretrained/pretrained/full_models/ffhq1024x1024.pt"
+  batch_gpu: 4
+  N_gen_images_eval: 50000
+  N_real_images_eval: 50000
+  del_fid_real_images: true
+  kid: false
+  real_dir: null
+  fake_dir: null
+  data_img_size: 1024
+
+rendering_time:
+  base: eval_fid_r1024
+  batch_gpu: 1
+  N_times: 1000
+
+gpu_memory_footprint:
+  base: eval_fid_r1024
+  batch_gpu: 4
+  N_times: 1000

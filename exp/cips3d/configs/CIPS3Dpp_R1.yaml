@@ -1,0 +1,143 @@
+merge_video_face:
+  video0: "cache_pretrained/video/face/cips3d/0.mp4"
+  video1: "cache_pretrained/video/face/cips3d/6.mp4"
+  video2: "cache_pretrained/video/face/cips3d/2.mp4"
+  video3: "cache_pretrained/video/face/cips3d/5.mp4"
+  video4: "cache_pretrained/video/face/cips3d/4.mp4"
+
+  saved_path: "cache_pretrained/video/face/cips3d/cips3dpp_face.mp4"
+
+merge_video_face_stylesdf:
+  video0: "cache_pretrained/video/stylesdf/0.mp4"
+  video1: "cache_pretrained/video/stylesdf/1.mp4"
+  video2: "cache_pretrained/video/stylesdf/2.mp4"
+  video3: "cache_pretrained/video/stylesdf/3.mp4"
+  video4: "cache_pretrained/video/stylesdf/4.mp4"
+
+  saved_path: "cache_pretrained/video/stylesdf/stylesdf_face.mp4"
+
+merge_video_face_stylenerf:
+  video0: "cache_pretrained/video/stylenerf/1.mp4"
+  video1: "cache_pretrained/video/stylenerf/0.mp4"
+  video2: "cache_pretrained/video/stylenerf/2.mp4"
+  video3: "cache_pretrained/video/stylenerf/3.mp4"
+  video4: "cache_pretrained/video/stylenerf/4.mp4"
+
+  saved_path: "cache_pretrained/video/stylenerf/stylenerf_face.mp4"
+
+merge_video_face_eg3d:
+  video0: "cache_pretrained/video/eg3d/1.mp4"
+  video1: "cache_pretrained/video/eg3d/0.mp4"
+  video2: "cache_pretrained/video/eg3d/2.mp4"
+  video3: "cache_pretrained/video/eg3d/3.mp4"
+  video4: "cache_pretrained/video/eg3d/4.mp4"
+
+  saved_path: "cache_pretrained/video/eg3d/eg3d_face.mp4"
+
+merge_video_face_gram_r256:
+  video0: "cache_pretrained/video/gram_256/4.mp4"
+  video1: "cache_pretrained/video/gram_256/0.mp4"
+  video2: "cache_pretrained/video/gram_256/1.mp4"
+  video3: "cache_pretrained/video/gram_256/2.mp4"
+  video4: "cache_pretrained/video/gram_256/3.mp4"
+
+  saved_path: "cache_pretrained/video/gram_256/gram_face.mp4"
+
+merge_video_cars_giraffe_r256:
+  video0: "cache_pretrained/video/cars_giraffe/0.mp4"
+  video1: "cache_pretrained/video/cars_giraffe/1.mp4"
+  video2: "cache_pretrained/video/cars_giraffe/2.mp4"
+  video3: "cache_pretrained/video/cars_giraffe/3.mp4"
+
+  saved_path: "cache_pretrained/video/cars_giraffe/giraffe_cars.mp4"
+
+merge_video_cars_giraffehd_r512:
+  video0: "cache_pretrained/video/cars_giraffehd/0.mp4"
+  video1: "cache_pretrained/video/cars_giraffehd/1.mp4"
+  video2: "cache_pretrained/video/cars_giraffehd/2.mp4"
+  video3: "cache_pretrained/video/cars_giraffehd/3.mp4"
+
+  saved_path: "cache_pretrained/video/cars_giraffehd/giraffehd_cars.mp4"
+
+merge_video_cars_cips3dpp_r512:
+  video0: "cache_pretrained/video/cips3d_cars/0.mp4"
+  video1: "cache_pretrained/video/cips3d_cars/1.mp4"
+  video2: "cache_pretrained/video/cips3d_cars/2.mp4"
+  video3: "cache_pretrained/video/cips3d_cars/3.mp4"
+
+  saved_path: "cache_pretrained/video/cips3d_cars/cips3dpp_cars.mp4"
+
+merge_video_multi_view_face:
+  video0: "cache_pretrained/video/cips3d/cips3dpp_face_hd.mp4"
+  video1: "cache_pretrained/video/stylesdf/stylesdf_face_hd.mp4"
+  video2: "cache_pretrained/video/stylenerf/stylenerf_face_hd.mp4"
+  video3: "cache_pretrained/video/eg3d_512/eg3d_face_hd.mp4"
+  video4: "cache_pretrained/video/gram_256/gram_face_hd.mp4"
+
+  saved_path: "cache_pretrained/video/multi_view_face.mp4"
+
+merge_video_rotate:
+  video0: "cache_pretrained/video/rotate/cips3dpp.mp4"
+  video1: "cache_pretrained/video/rotate/stylesdf.mp4"
+#  video2: "cache_pretrained/video/rotate/stylenerf.mp4"
+  video2: "cache_pretrained/video/rotate/stylenerf_cc.mp4"
+  video3: "cache_pretrained/video/rotate/eg3d.mp4"
+
+  saved_path: "cache_pretrained/video/rotate/roll_v2.mp4"
+
+merge_video_multi_view_cars:
+  video0: "cache_pretrained/video/cars_giraffe/giraffe_cars_hd.mp4"
+  video1: "cache_pretrained/video/cars_giraffehd/giraffehd_cars_hd.mp4"
+  video2: "cache_pretrained/video/cips3d_cars/cips3dpp_cars_hd.mp4"
+
+  saved_path: "cache_pretrained/video/cars_360.mp4"
+
+merge_video_carla_inversion:
+  image0: "cache_pretrained/video/cars_inversion/carla0.jpg"
+  video0_inversion: "cache_pretrained/video/cars_inversion/carla0_inversion.mp4"
+  video0_multiview: "cache_pretrained/video/cars_inversion/carla0_multi_view.mp4"
+
+  image1: "cache_pretrained/video/cars_inversion/carla1.jpg"
+  video1_inversion: "cache_pretrained/video/cars_inversion/carla1_inversion.mp4"
+  video1_multiview: "cache_pretrained/video/cars_inversion/carla1_multi_view.mp4"
+
+  saved_path: "cache_pretrained/video/cars_inversion/merge_carla.mp4"
+
+merge_video_compcars_inversion:
+  image0: "cache_pretrained/video/cars_inversion/suv1.jpg"
+  video0_inversion: "cache_pretrained/video/cars_inversion/suv1_inversion.mp4"
+  video0_multiview: "cache_pretrained/video/cars_inversion/suv1_multi_view.mp4"
+
+  image1: "cache_pretrained/video/cars_inversion/suv3.jpg"
+  video1_inversion: "cache_pretrained/video/cars_inversion/suv3_inversion.mp4"
+  video1_multiview: "cache_pretrained/video/cars_inversion/suv3_multi_view.mp4"
+
+  saved_path: "cache_pretrained/video/cars_inversion/merge_compcars.mp4"
+
+merge_video_cars_inversion:
+  video0: "cache_pretrained/video/cars_inversion/merge_carla_hd.mp4"
+  video1: "cache_pretrained/video/cars_inversion/merge_compcars_hd.mp4"
+
+  saved_path: "cache_pretrained/video/cars_inversion/inversion_cars.mp4"
+
+plot_fid_days:
+  xlabel: "GPU days (8*V100)"
+  ylabel: "FID"
+  fontsize:
+    tick_fs: 15
+    xylabel_fs: 17
+    legend_size: 16
+  clip_x:
+    - 0
+    - 170000
+#  properties:
+#    xlim:
+#      - -200000
+#      - 51000000
+#    ylim:
+#      - 10
+#      - 45
+  get_min_value: true
+  add_auxi_label: true
+
+  saved_file: "fid_gpu_days.pdf"

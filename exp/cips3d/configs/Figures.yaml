@@ -1,0 +1,62 @@
+plot_fid_end2end_figure:
+  xlabel: "Iterations"
+  ylabel: "FID"
+  fontsize:
+    tick_fs: 10
+    xylabel_fs: 15
+    legend_size: 15
+  clip_x:
+    - 0
+    - 200000
+  properties:
+#    xlim:
+#      - -200000
+#      - 51000000
+    ylim:
+      - 15
+      - 80
+  get_min_value: true
+  add_auxi_label: false
+  lines:
+    cips3d_r64_end2end:
+      pkl_file: "results/Figures/_plot_fid_end2end_bucket/Figures___plot_fid_end2end_bucket.pkl"
+      dict_index: "FID_FFHQ"
+      data_index: "CIPS_3D-r64-detach.F"
+      color: 'beauty_blue'
+      properties:
+        label: "FFHQ $64^2$, CIPS-3D, end-to-end"
+#        ls: "--"
+        lw: 2
+#        marker: "."
+    cips3d_r64_detach:
+      pkl_file: "results/Figures/_plot_fid_end2end_bucket/Figures___plot_fid_end2end_bucket.pkl"
+      dict_index: "FID_FFHQ"
+      data_index: "CIPS_3D-r64-detach.T"
+      color: 'beauty_blue'
+      properties:
+        label: "FFHQ $64^2$, CIPS-3D, detach"
+        ls: "--"
+        lw: 2
+#        marker: "."
+    cips3dpp_r1024_end2end:
+      pkl_file: "results/Figures/_plot_fid_end2end_bucket/Figures___plot_fid_end2end_bucket.pkl"
+      dict_index: "FID_FFHQ"
+      data_index: "CIPS_3Dpp-r1024-detach.F"
+      color: 'dark_red'
+      properties:
+        label: "FFHQ $1024^2$, CIPS-3D++, end-to-end"
+#        ls: "--"
+        lw: 2
+#        marker: "."
+    cips3dpp_r1024_detach:
+      pkl_file: "results/Figures/_plot_fid_end2end_bucket/Figures___plot_fid_end2end_bucket.pkl"
+      dict_index: "FID_FFHQ"
+      data_index: "CIPS_3Dpp-r1024-detach.T"
+      color: 'dark_red'
+      properties:
+        label: "FFHQ $1024^2$, CIPS-3D++, detach"
+        ls: "--"
+        lw: 2
+#        marker: "."
+
+  saved_file: "cips3d_end2end.pdf"

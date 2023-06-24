@@ -1,0 +1,283 @@
+root_obs: &root_obs s3://bucket-3690/ZhouPeng
+
+network_pkl: &network_pkl
+  FFHQ_v8_r128_r1024_zx: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v8/train_r1024_r128_ks1-20220714_193406_689/ckptdir/resume"
+  FFHQ_v8_r128_r1024: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v8/train_r1024_r128_ks1-20220704_093955_488/ckptdir/resume"
+  FFHQ_v8_no_viewdir: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v8/train_r1024_r64_ks1-20220625_203317_642/ckptdir/resume"
+  FFHQ_v8_nowarmup: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v8/train_r1024_r64_ks1-20220625_053015_397/ckptdir/resume"
+
+  FFHQ_v7_1024_modplane: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v7/train_r1024_r64_ks1-20220626_204022_105/ckptdir/resume"
+#  FFHQ_v7_1024_modplane: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v7/train_r1024_r64_ks1-20220622_151900_194/ckptdir/resume"
+  FFHQ_v7_1024: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v7/train_r1024_r64_ks1-20220621_152953_739/ckptdir/resume"
+#  FFHQ_filterc3_v7_512_1024: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v7/train_r1024_r64_ks1-20220620_105147_079/ckptdir/resume"
+
+#  FFHQ_filterc3_v6: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v6/train_r1024_r64_ks1-20220619_182054_455/ckptdir/resume"
+
+#  FFHQ_xy_xz_zx: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v5/train_r1024_r64_ks1-20220618_230346_891/ckptdir/resume"
+#  FFHQ_xy_xz_yz: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v5/train_r1024_r64_ks1-20220618_231453_606/ckptdir/resume"
+#  FFHQ_xy_xz_zx_symc3: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v5/train_r1024_r64_ks3_symm_conv-20220619_020302_744/ckptdir/resume"
+
+  FFHQ_v4_N_freq4: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v4/train_r1024_r64_ks1-20220618_020428_188/ckptdir/resume"
+#  FFHQ_N_freq0: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v4/train_r1024_r64_ks1-20220618_023441_881/ckptdir/resume"
+
+
+obs_inception_v3: &obs_inception_v3
+  datapath_obs: 'keras/cache/torch/hub/checkpoints/weights-inception-2015-12-05-6726825d.pth'
+  datapath: "~/.cache/torch/hub/checkpoints/weights-inception-2015-12-05-6726825d.pth"
+  disable: false
+  overwrite: false
+  unzip: false
+
+
+obs_ffhq_r1024: &obs_ffhq_r1024
+  datapath_obs: 'keras/ffhq/images1024x1024_lmdb_1024/'
+  datapath: "datasets/ffhq/images1024x1024_lmdb_1024/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+
+G_cfg: &G_cfg
+  register_modules:
+    - "exp.cips3d.models.model_v4"
+  name: "exp.cips3d.models.model_v4.Generator"
+  enable_decoder: true
+  freeze_renderer: false
+  renderer_detach: false
+  predict_rgb_residual: false
+  scale_factor: 1
+  backbone_cfg:
+    size_start: 4
+    size_end: 256
+#    'style_dim': 512
+    'in_channel': 512
+    'channel_multiplier': 2
+    plane_dim: 96
+    'project_noise': False
+    'upsample_list': [8, 16, 32, 64, 128, 256]
+    'kernel_size': 3
+  mapping_backbone_cfg:
+    z_dim: 512
+    style_dim: 512
+    lr_mul_mapping: 0.01
+    N_layers: 5
+
+  renderer_cfg:
+#    input_dim: 3
+#    hidden_dim: 256
+    hidden_dim: 64
+    view_enc_cfg:
+#      N_freqs: 4
+      N_freqs: 0
+      append_xyz: true
+    with_sdf: true
+    output_features : true
+
+  decoder_cfg:
+    size_start: 4
+    size_end: 1024
+#    'style_dim': 512
+    'in_channel': 256
+    'channel_multiplier': 2
+    'project_noise': False
+    'upsample_list': [128, 256, 512, 1024]
+#    'upsample_list': []
+    'kernel_size': 1
+  mapping_decoder_cfg:
+#    z_dim: 256
+    style_dim: 512
+    lr_mul_mapping: 0.01
+    N_layers: 5
+
+
+G_kwargs: &G_kwargs
+  cam_cfg:
+    'img_size': 64
+    'uniform': False
+    'azim_range': 0.3
+    'elev_range': 0.15
+    'fov_ang': 6
+    'dist_radius': 0.15
+  nerf_cfg:
+    N_samples: 24
+    perturb: true
+    static_viewdirs: false
+
+_build_generator:
+  G_cfg: *G_cfg
+  G_kwargs: *G_kwargs
+
+D_cfg: &D_cfg
+  register_modules:
+    - "exp.cips3d.models.discriminator"
+  name: "exp.cips3d.models.discriminator.D_StyleGAN_Progressive"
+  input_size: 1024
+  channel_multiplier: 2
+  pretrained_size: null
+
+D_renderer_cfg: &D_renderer_cfg
+  register_modules:
+    - "exp.cips3d.models.discriminator_pose"
+  name: "exp.cips3d.models.discriminator_pose.D_VolumeRender_Progressive"
+  input_size: 1024
+  viewpoint_loss: true
+  pretrained_size: null
+
+train_base:
+  root_obs: *root_obs
+  obs_training_dataset: *obs_ffhq_r1024
+#  obs_training_dataset: *obs_ffhq_r64
+  obs_inception_v3: *obs_inception_v3
+  G_cfg: *G_cfg
+  G_kwargs: *G_kwargs
+  D_cfg: *D_cfg
+  D_renderer_cfg: *D_renderer_cfg
+  # optims
+  G_lr_render: 2.e-4
+  G_lr_decoder: 0.002
+  D_lr_render: 2.e-4
+  D_lr_decoder: 0.002
+  # args
+  total_iters: 200000
+  ema_start: 1000
+  batch: 4
+  chunk: 4
+  expname: ffhq1024x1024
+  size: 1024
+  tl_finetune: false
+  finetune_dir: "results/StyleSDF-exp/train_volume_render_ffhq/train_volume_render-20220325_102346_871/ckptdir/01"
+  # train
+  d_reg_every: 15
+  g_reg_every: 5
+#  d_reg_every: 16
+#  g_reg_every: 4
+  path_regularize: 2
+  N_rays_forward: null
+  N_rays_grad: null
+  N_samples_forward: null
+  fade_D: true
+  fade_steps: 10000
+  init_renderer: true
+  init_renderer_ckpt: null
+#  init_renderer_ckpt: "results/StyleSDF-exp/train_cips3d_ffhq/train_r64-20220331_224622_038/ckptdir/G_sdf_init.pth"
+  grad_clip: 20.
+  warmup_iters: -1
+  num_workers: 0
+  # loss
+  lambda_gp: 10.
+  lambda_pose: 15.
+  lambda_eikonal: 0.1
+  lambda_min_surf: 0.05
+  min_surf_beta: 100.
+  # log
+  log_txt_every: 10
+  log_ckpt_every: 500
+  log_N_row: 8
+  log_N_col: 8
+  # eval
+  batch_gpu: 4
+  N_gen_images_eval: 2048
+  N_real_images_eval: 2048
+  del_fid_real_images: true
+  kid: false
+
+
+train_r1024_r64_ks1:
+  base: train_base
+  obs_training_dataset: *obs_ffhq_r1024
+  G_cfg:
+    enable_decoder: true
+#    freeze_renderer: true
+#    renderer_detach: true
+    freeze_renderer: false
+    renderer_detach: false
+    predict_rgb_residual: false
+    decoder_cfg:
+      upsample_list: [128, 256, 512, 1024]
+      kernel_size: 1
+  G_kwargs:
+    cam_cfg:
+      img_size: 64
+  D_cfg:
+    pretrained_size: null
+  D_renderer_cfg:
+    pretrained_size: null
+  init_renderer: true
+  init_iters: 5000
+  tl_finetune: false
+#  tl_finetune: true
+#  finetune_dir: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v3/train_r1024_r64_ks1-20220411_235145_682/ckptdir/resume"
+  total_iters: 800000
+  ema_start: 1000
+  N_rays_forward: null
+  N_rays_grad: null
+  N_samples_forward: null
+  eikonal_reg: false
+  sdf_reg: true
+#  eikonal_reg: false
+#  sdf_reg: false
+  g_reg_every: 5
+#  g_reg_every: -1 # path_reg false
+  batch_gpu: 4
+  warmup_iters: 10000
+  cam_img_size: 64
+  gen_img_size: 1024 # train patch size
+  data_img_size: 1024
+#  sample_mode: 'patch'
+
+
+_sample_multi_view_web:
+  root_obs: *root_obs
+  port: 8501
+  sidebar:
+    sidebar_name: "show_video"
+  model_cfg:
+    register_modules:
+      - exp.cips3d.models.render_video_web_v4
+    name: exp.cips3d.models.render_video_web_v4.STModel
+  mode:
+    - _sample_multi_view_web
+  _sample_multi_view_web:
+    N_frames: 40
+    fps: 20
+    hd_video: true
+
+    truncation_ratio: 0.5
+    N_samples: 128
+    zero_noise_bufs: true
+    light_location: [ 0, 0, 5 ]
+    show_trajectory: true
+
+    seeds:
+      - 8936799
+      - 1422866
+      - 1010682
+      - 4921831
+#      - 8666477
+#      - 5949945
+#      - 5623520
+#      - 2397456
+#      - 2910468
+#      - 1317869
+    view_mode:
+      - yaw
+      - translate_rotate
+      - circle
+    default_view_mode: circle
+    azim_mean: 0.
+    elev_mean: 0.
+    azim_std: 0.3
+    elev_std: 0.25
+    fov: 6.
+    fov_std: 0.
+
+    azim_range: [-0.77, 0.77]
+    elev: 0.
+    trans_max: 0.06
+    circle:
+      azim_range: 0.5
+      elev_range: 0.
+      fov_range: [6, 8]
+
+    network_pkl: *network_pkl
+    default_network_pkl: FFHQ_v4_N_freq4

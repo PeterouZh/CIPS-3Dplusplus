@@ -1,0 +1,366 @@
+root_obs: &root_obs s3://bucket-3690/ZhouPeng
+
+obs_inception_v3: &obs_inception_v3
+  datapath_obs: 'keras/cache/torch/hub/checkpoints/weights-inception-2015-12-05-6726825d.pth'
+  datapath: "~/.cache/torch/hub/checkpoints/weights-inception-2015-12-05-6726825d.pth"
+  disable: false
+  overwrite: false
+  unzip: false
+
+
+obs_ffhq_r1024: &obs_ffhq_r1024
+  datapath_obs: 'keras/ffhq/images1024x1024_lmdb_1024/'
+  datapath: "datasets/ffhq/images1024x1024_lmdb_1024/"
+  disable: false
+  overwrite: false
+  unzip: false
+
+
+G_kwargs: &G_kwargs
+  cam_cfg:
+#    'img_size': 64
+    'img_size': 128
+    'uniform': False
+    'azim_range': 0.3
+    'elev_range': 0.15
+    'fov_ang': 6
+    'dist_radius': 0.15
+  nerf_cfg:
+    N_samples: 24
+#    N_samples: 64
+    perturb: true
+    static_viewdirs: false
+
+
+G_cfg: &G_cfg
+  register_modules:
+    - "exp.cips3d.models.model_v8"
+  name: "exp.cips3d.models.model_v8.Generator"
+  enable_decoder: true
+  freeze_renderer: false
+  renderer_detach: false
+  predict_rgb_residual: false
+  scale_factor: 1
+  G_kwargs: *G_kwargs
+  backbone_cfg:
+    size_start: 4
+    size_end: 256
+#    'style_dim': 512
+    'in_channel': 512
+    'channel_multiplier': 2
+    plane_dim: 96
+    'project_noise': False
+    'upsample_list': [8, 16, 32, 64, 128, 256]
+    'kernel_size': 3
+  mapping_backbone_cfg:
+    z_dim: 512
+    style_dim: 512
+    lr_mul_mapping: 0.01
+    N_layers: 5
+
+  renderer_cfg:
+#    input_dim: 3
+#    hidden_dim: 256
+    hidden_dim: 64
+    view_enc_cfg:
+      enable: true
+      N_freqs: 4
+#      N_freqs: 0
+      append_xyz: true
+    triplane_mode: "xy_xz_zx"
+    with_sdf: true
+    output_features : true
+
+  decoder_cfg:
+    size_start: 4
+    size_end: 1024
+#    'style_dim': 512
+    'in_channel': 256
+    'channel_multiplier': 2
+    'project_noise': False
+    'upsample_list': [256, 512, 1024]
+#    'upsample_list': []
+    'kernel_size': 1
+  mapping_decoder_cfg:
+#    z_dim: 256
+    style_dim: 512
+    lr_mul_mapping: 0.01
+    N_layers: 5
+
+
+
+_build_generator:
+  G_cfg: *G_cfg
+  G_kwargs: *G_kwargs
+
+D_cfg: &D_cfg
+  register_modules:
+    - "exp.cips3d.models.discriminator"
+  name: "exp.cips3d.models.discriminator.D_StyleGAN_Progressive"
+  input_size: 1024
+  channel_multiplier: 2
+  pretrained_size: null
+
+D_renderer_cfg: &D_renderer_cfg
+  register_modules:
+    - "exp.cips3d.models.discriminator_pose"
+  name: "exp.cips3d.models.discriminator_pose.D_VolumeRender_Progressive"
+  input_size: 1024
+  viewpoint_loss: true
+  pretrained_size: null
+
+train_base:
+  root_obs: *root_obs
+  obs_training_dataset: *obs_ffhq_r1024
+#  obs_training_dataset: *obs_ffhq_r64
+  obs_inception_v3: *obs_inception_v3
+  G_cfg: *G_cfg
+  G_kwargs: *G_kwargs
+  D_cfg: *D_cfg
+  D_renderer_cfg: *D_renderer_cfg
+  # optims
+  G_lr_render: 2.e-4
+  G_lr_decoder: 0.002
+  D_lr_render: 2.e-4
+  D_lr_decoder: 0.002
+  # args
+  total_iters: 200000
+  ema_start: 1000
+  batch: 4
+  chunk: 4
+  expname: ffhq1024x1024
+  size: 1024
+  tl_finetune: false
+  finetune_dir: "results/StyleSDF-exp/train_volume_render_ffhq/train_volume_render-20220325_102346_871/ckptdir/01"
+  # train
+  d_reg_every: 15
+  g_reg_every: 5
+#  d_reg_every: 16
+#  g_reg_every: 4
+  path_regularize: 2
+  N_rays_forward: null
+  N_rays_grad: null
+  N_samples_forward: null
+  fade_D: true
+  fade_steps: 10000
+  init_renderer: true
+  init_renderer_ckpt: null
+#  init_renderer_ckpt: "results/StyleSDF-exp/train_cips3d_ffhq/train_r64-20220331_224622_038/ckptdir/G_sdf_init.pth"
+  grad_clip: 20.
+  warmup_iters: -1
+  num_workers: 0
+  skip_eval: false
+  # loss
+  lambda_gp: 10.
+  lambda_pose: 15.
+  lambda_eikonal: 0.1
+  lambda_min_surf: 0.05
+  min_surf_beta: 100.
+  # log
+  log_txt_every: 10
+  log_ckpt_every: 500
+  log_N_row: 8
+  log_N_col: 8
+  # eval
+  batch_gpu: 4
+  N_gen_images_eval: 2048
+  N_real_images_eval: 2048
+  del_fid_real_images: true
+  kid: false
+
+
+train_r1024_r64_ks1:
+  base: train_base
+  obs_training_dataset: *obs_ffhq_r1024
+  G_cfg:
+    enable_decoder: true
+#    freeze_renderer: true
+#    renderer_detach: true
+    freeze_renderer: false
+    renderer_detach: false
+    predict_rgb_residual: false
+    decoder_cfg:
+      upsample_list: [256, 512, 1024]
+      kernel_size: 1
+  G_kwargs:
+    cam_cfg:
+#      img_size: 64
+      img_size: 128
+  D_cfg:
+    pretrained_size: null
+  D_renderer_cfg:
+    pretrained_size: null
+  init_renderer: true
+  init_iters: 5000
+  tl_finetune: false
+#  tl_finetune: true
+#  finetune_dir: "../bucket_3690/results/StyleSDF-exp/train_cips3d_ffhq_v3/train_r1024_r64_ks1-20220411_235145_682/ckptdir/resume"
+  total_iters: 800000
+  ema_start: 1000
+  N_rays_forward: null
+  N_rays_grad: null
+  N_samples_forward: null
+  eikonal_reg: false
+  sdf_reg: true
+#  eikonal_reg: false
+#  sdf_reg: false
+  g_reg_every: 5
+#  g_reg_every: -1 # path_reg false
+  batch_gpu: 4
+  warmup_iters: 10000
+#  cam_img_size: 64
+  cam_img_size: 128
+  gen_img_size: 1024 # train patch size
+  data_img_size: 1024
+#  sample_mode: 'patch'
+
+train_r1024_r128_ks1:
+  root_obs: *root_obs
+  obs_training_dataset: *obs_ffhq_r1024
+  obs_inception_v3: *obs_inception_v3
+  G_cfg:
+    register_modules:
+    - exp.cips3d.models.model_v8
+    name: exp.cips3d.models.model_v8.Generator
+    enable_decoder: true
+    freeze_renderer: false
+    renderer_detach: false
+    predict_rgb_residual: false
+    scale_factor: 1
+    G_kwargs:
+      cam_cfg:
+        img_size: 128
+        uniform: false
+        azim_range: 0.3
+        elev_range: 0.15
+        fov_ang: 6
+        dist_radius: 0.15
+      nerf_cfg:
+        N_samples: 24
+        perturb: true
+        static_viewdirs: false
+    backbone_cfg:
+      size_start: 4
+      size_end: 256
+      in_channel: 512
+      channel_multiplier: 2
+      plane_dim: 96
+      project_noise: false
+      upsample_list:
+      - 8
+      - 16
+      - 32
+      - 64
+      - 128
+      - 256
+      kernel_size: 3
+    mapping_backbone_cfg:
+      z_dim: 512
+      style_dim: 512
+      lr_mul_mapping: 0.01
+      N_layers: 5
+    renderer_cfg:
+      hidden_dim: 64
+      view_enc_cfg:
+        enable: true
+        N_freqs: 4
+        append_xyz: true
+      triplane_mode: "xy_xz_zx"
+      with_sdf: true
+      output_features: true
+    decoder_cfg:
+      size_start: 4
+      size_end: 1024
+      in_channel: 256
+      channel_multiplier: 2
+      project_noise: false
+      upsample_list:
+#      - 128
+      - 256
+      - 512
+      - 1024
+      kernel_size: 1
+    mapping_decoder_cfg:
+      style_dim: 512
+      lr_mul_mapping: 0.01
+      N_layers: 5
+  G_kwargs:
+    cam_cfg:
+#      img_size: 64
+      img_size: 128
+      uniform: false
+      azim_range: 0.3
+      elev_range: 0.15
+      fov_ang: 6
+      dist_radius: 0.15
+    nerf_cfg:
+      N_samples: 24
+      perturb: true
+      static_viewdirs: false
+  D_cfg:
+    register_modules:
+    - exp.cips3d.models.discriminator
+    name: exp.cips3d.models.discriminator.D_StyleGAN_Progressive
+    input_size: 1024
+    channel_multiplier: 2
+    pretrained_size: null
+  D_renderer_cfg:
+    register_modules:
+    - exp.cips3d.models.discriminator_pose
+    name: exp.cips3d.models.discriminator_pose.D_VolumeRender_Progressive
+    input_size: 1024
+    viewpoint_loss: true
+    pretrained_size: 64
+  G_lr_render: 0.0002
+  G_lr_decoder: 0.002
+  D_lr_render: 0.0002
+  D_lr_decoder: 0.002
+  total_iters: 800000
+  ema_start: 1000
+  batch: 4
+  chunk: 4
+  expname: ffhq1024x1024
+  size: 1024
+  tl_finetune: true
+  finetune_dir: "results/StyleSDF-exp/train_cips3d_ffhq_v8/train_r1024_r64_ks1-20220625_053015_397/ckptdir/resume"
+  d_reg_every: 15
+  g_reg_every: 5
+  path_regularize: 2
+  N_rays_forward: null
+  N_rays_grad: null
+  N_samples_forward: null
+  fade_D: true
+  fade_steps: 10000
+  init_renderer: true
+  init_renderer_ckpt: null
+  grad_clip: 20.0
+  warmup_iters: 0
+  num_workers: 8
+  skip_eval: false
+  lambda_gp: 10.0
+  lambda_pose: 15.0
+  lambda_eikonal: 0.1
+  lambda_min_surf: 0.05
+  min_surf_beta: 100.0
+  log_txt_every: 10
+  log_ckpt_every: 500
+  log_N_row: 8
+  log_N_col: 8
+  batch_gpu: 4
+  N_gen_images_eval: 2048
+  N_real_images_eval: 2048
+  del_fid_real_images: false
+  kid: false
+  init_iters: 5000
+  eikonal_reg: false
+#  eikonal_reg: true
+  sdf_reg: true
+  sdf_even_loss: false
+  sdf_even_interval: 10.
+  depth_reg: false
+#  cam_img_size: 64
+  cam_img_size: 128
+  gen_img_size: 1024
+  data_img_size: 1024
+
+

@@ -1,0 +1,17 @@
+lmdb
+numpy
+ninja
+pillow
+requests
+tqdm
+scipy
+scikit-image==0.19.2
+scikit-video
+trimesh[easy]
+configargparse
+munch
+wandb
+einops
+streamlit
+lpips
+timm==0.5.4

@@ -1,0 +1,15 @@
+_build_VolumeRenderDiscriminator:
+  register_modules:
+    - "exp.cips3d.models.discriminator_pose"
+  name: "exp.cips3d.models.discriminator_pose.VolumeRenderDiscriminator"
+  input_size: 128
+  viewpoint_loss: true
+
+_build_D_VolumeRender_Progressive:
+  register_modules:
+    - "exp.cips3d.models.discriminator_pose"
+  name: "exp.cips3d.models.discriminator_pose.D_VolumeRender_Progressive"
+  input_size: 1024
+  viewpoint_loss: true
+  pretrained_size: 64
+

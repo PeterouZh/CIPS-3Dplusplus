@@ -1,0 +1,188 @@
+root_obs: &root_obs s3://bucket-3690/ZhouPeng
+
+obs_ffhq_dataset: &obs_ffhq_dataset
+    datapath_obs: 'keras/ffhq/images1024x1024.zip'
+    datapath: "datasets/ffhq/images1024x1024.zip"
+    disable: false
+    overwrite: false
+    unzip: true
+
+obs_afhq_dataset: &obs_afhq_dataset
+    datapath_obs: 'keras/AFHQv2/AFHQv2'
+    datapath: "datasets/AFHQv2/AFHQv2"
+    disable: false
+    overwrite: false
+    unzip: false
+
+obs_compcars_dataset: &obs_compcars_dataset
+    datapath_obs: 'keras/CompCars/CombCars.zip'
+    datapath: "datasets/CompCars/CombCars.zip"
+    disable: false
+    overwrite: false
+    unzip: true
+
+obs_carla_dataset: &obs_carla_dataset
+    datapath_obs: 'keras/carla/carla.zip'
+    datapath: "datasets/carla/images/0/carla.zip"
+    disable: false
+    overwrite: false
+    unzip: true
+
+obs_dvm_car_dataset: &obs_dvm_car_dataset
+    datapath_obs: 'keras/DVM_CAR/resized_DVM_v2.zip'
+    datapath: "datasets/DVM_CAR/resized_DVM_v2.zip"
+    disable: false
+    overwrite: false
+    unzip: true
+
+obs_chairs_dataset: &obs_chairs_dataset
+    datapath_obs: 'keras/chairs/rendered_chairs_crop500_r256'
+    datapath: "datasets/chairs/rendered_chairs_crop500_r256"
+    disable: false
+    overwrite: false
+    unzip: false
+
+obs_metfaces_dataset: &obs_metfaces_dataset
+    datapath_obs: 'keras/MetFaces/images'
+    datapath: "datasets/MetFaces/images_1024/0"
+    disable: false
+    overwrite: false
+    unzip: false
+
+obs_bitmojifaces_dataset: &obs_bitmojifaces_dataset
+    datapath_obs: 'keras/Faces/BitmojiFaces/BitmojiDataset/'
+    datapath: "datasets/Faces/BitmojiFaces/BitmojiDataset/"
+    disable: false
+    overwrite: false
+    unzip: false
+
+obs_disney_dataset: &obs_disney_dataset
+    datapath_obs: 'keras/Faces/disney_cartoon/cartoon1024/'
+    datapath: "datasets/Faces/disney_cartoon/images/0"
+    disable: false
+    overwrite: false
+    unzip: false
+
+obs_photo2cartoon_dataset: &obs_photo2cartoon_dataset
+    datapath_obs: 'keras/Faces/photo2cartoon/photo2cartoon/'
+    datapath: "datasets/Faces/photo2cartoon/photo2cartoon/"
+    disable: false
+    overwrite: false
+    unzip: false
+
+
+prepare_data_ffhq_r1024:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_ffhq_dataset
+  in_path: "datasets/ffhq/images1024x1024"
+  obs_out_path: "keras/ffhq/"
+  out_path: "datasets/ffhq/"
+  n_worker: 32
+  size: [1024, ]
+
+
+prepare_data_ffhq_r512:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_ffhq_dataset
+  in_path: "datasets/ffhq/images1024x1024"
+  obs_out_path: "keras/ffhq/"
+  out_path: "datasets/ffhq/"
+  n_worker: 32
+  size: [512, ]
+
+
+prepare_data_afhq_r512:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_afhq_dataset
+  in_path: "datasets/AFHQv2/AFHQv2"
+  obs_out_path: "keras/AFHQv2/"
+  out_path: "datasets/AFHQv2/"
+  n_worker: 32
+  size: [512, ]
+
+
+prepare_data_compcars_r256:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_compcars_dataset
+  in_path: "datasets/CompCars/CombCars/image"
+  obs_out_path: "keras/CompCars/"
+  out_path: "datasets/CompCars/"
+  saved_name: "image_pad"
+  n_worker: 32
+  size: [256, ]
+
+
+prepare_data_carla_r256:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_carla_dataset
+  in_path: "datasets/carla/images"
+  obs_out_path: "keras/carla/"
+  out_path: "datasets/carla/"
+  n_worker: 32
+  size: [256, ]
+
+
+prepare_data_dvm_car_r256:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_dvm_car_dataset
+  in_path: "datasets/DVM_CAR/resized_DVM"
+  obs_out_path: "keras/DVM_CAR/"
+  out_path: "datasets/DVM_CAR/"
+#  saved_name: "image_pad"
+  n_worker: 32
+  size: [256, ]
+
+
+prepare_data_chairs_r256:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_chairs_dataset
+  in_path: "datasets/chairs/rendered_chairs_crop500_r256"
+  obs_out_path: "keras/chairs/"
+  out_path: "datasets/chairs/"
+#  saved_name: "image_pad"
+  n_worker: 32
+  size: [256, ]
+
+
+prepare_data_metfaces_r1024:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_metfaces_dataset
+  in_path: "datasets/MetFaces/images_1024"
+  obs_out_path: "keras/MetFaces/"
+  out_path: "datasets/MetFaces/"
+#  saved_name: "image_pad"
+  n_worker: 32
+  size: [1024, ]
+
+
+prepare_data_bitmojifaces_r1024:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_bitmojifaces_dataset
+  in_path: "datasets/Faces/BitmojiFaces/BitmojiDataset"
+  obs_out_path: "keras/Faces/BitmojiFaces/"
+  out_path: "datasets/Faces/BitmojiFaces/"
+#  saved_name: "image_pad"
+  n_worker: 32
+  size: [1024, ]
+
+
+prepare_data_disney_r1024:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_disney_dataset
+  in_path: "datasets/Disney_cartoon/cartoon"
+  obs_out_path: "keras/Faces/disney_cartoon/"
+  out_path: "datasets/Disney_cartoon"
+#  saved_name: "image_pad"
+  n_worker: 32
+  size: [1024, ]
+
+
+prepare_data_photo2cartoon_r1024:
+  root_obs: *root_obs
+  obs_dataset_root: *obs_photo2cartoon_dataset
+  in_path: "datasets/Faces/photo2cartoon/photo2cartoon"
+  obs_out_path: "keras/Faces/photo2cartoon/"
+  out_path: "datasets/Faces/photo2cartoon/"
+#  saved_name: "image_pad"
+  n_worker: 32
+  size: [1024, ]

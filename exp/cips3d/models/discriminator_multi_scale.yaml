@@ -1,0 +1,10 @@
+_build_Discriminator_MultiScale:
+  register_modules:
+    - exp.cips3d_inversion.models.discriminator
+  name: exp.cips3d_inversion.models.discriminator.Discriminator_MultiScale_Aux
+  diffaug: false
+  max_size: 1024
+  channel_multiplier: 2
+  first_downsample: false
+  stddev_group: 4
+
